@@ -11,9 +11,12 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const url = process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-    : "http://localhost:3000/api/trpc/";
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+    return process.env.NEXT_PUBLIC_VERCEL_URL ?? 'http://localhost:3000';
+  };
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -22,7 +25,7 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
           enabled: () => true,
         }),
         httpBatchLink({
-          url,
+          url: `${getBaseUrl()}/api/trpc`,
           fetch: async (input, init?) => {
             const fetch = getFetch();
             return fetch(input, {
@@ -33,7 +36,6 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
           transformer: superjson,
         }),
       ],
-      // transformer: superjson,
     }),
   );
   return (
