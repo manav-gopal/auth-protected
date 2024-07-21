@@ -8,7 +8,6 @@ export default async function VerifyPage() {
   let email = "email@gmail.com";
   const user = await getAuthUser({ shouldRedirect: false });
   if (user) {
-    console.log(user);
     if (user.verified === false) {
       email = user.email;
       const otp = otpService.generateOTP();

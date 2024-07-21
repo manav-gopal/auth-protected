@@ -43,24 +43,6 @@ const Categories: React.FC = () => {
     await updateUserInterests({ categoryId: id, interested: interested });
   };
 
-  const pageButton = (pageNum: number) => (
-    <button
-      onClick={() => setCurrentPage(pageNum)}
-      className="px-2 text-gray-400 hover:scale-125"
-    >
-      {pageNum}
-    </button>
-  );
-  const renderPageNumbers = () => (
-    <>
-      {currentPage > 1 && pageButton(currentPage - 1)}
-      <label className="px-2 text-lg font-bold">{currentPage}</label>
-      {currentPage < totalPages && pageButton(currentPage + 1)}
-      <label className="px-2 text-lg">{"...."}</label>
-      {pageButton(totalPages)}
-    </>
-  );
-
   return (
     <div className="mx-auto w-full max-w-xl rounded-[20px] border-[1px] border-[#C1C1C1] p-12 shadow-md">
       <h2 className="mb-6 text-center text-2xl font-bold">
@@ -69,7 +51,6 @@ const Categories: React.FC = () => {
       <p className="mb-8 text-center text-sm font-normal text-black">
         We will keep you notified.
       </p>
-
       <h3 className="mb-8 text-xl font-medium">My saved categories!</h3>
       <ul className="mb-4">
         {categories.map((category) => (
@@ -123,7 +104,62 @@ const Categories: React.FC = () => {
         >
           &lt;
         </button>
-        {renderPageNumbers()}
+
+        {/* New pagination rendering logic */}
+        {(() => {
+          let pages = [];
+          const maxVisiblePages = 7;
+
+          if (totalPages <= maxVisiblePages) {
+            // If total pages are 7 or less, show all pages
+            pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+          } else if (currentPage <= 4) {
+            // Show first 5 pages, dots, and last page
+            pages = [1, 2, 3, 4, 5, "...", totalPages];
+          } else if (currentPage >= totalPages - 3) {
+            // Show first page, dots, and last 5 pages
+            pages = [
+              1,
+              "...",
+              totalPages - 4,
+              totalPages - 3,
+              totalPages - 2,
+              totalPages - 1,
+              totalPages,
+            ];
+          } else {
+            // Show first page, dots, current page and neighbors, dots, and last page
+            pages = [
+              1,
+              "...",
+              currentPage - 1,
+              currentPage,
+              currentPage + 1,
+              "...",
+              totalPages,
+            ];
+          }
+
+          return pages.map((page, index) => (
+            <React.Fragment key={index}>
+              {page === "..." ? (
+                <span className="mx-1 px-2 text-gray-400">...</span>
+              ) : (
+                <button
+                  onClick={() => setCurrentPage(page as number)}
+                  className={`mx-1 px-2 ${
+                    page === currentPage
+                      ? "font-bold text-black"
+                      : "text-gray-400 hover:scale-125"
+                  }`}
+                >
+                  {page}
+                </button>
+              )}
+            </React.Fragment>
+          ));
+        })()}
+
         <button
           onClick={() =>
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))

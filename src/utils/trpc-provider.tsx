@@ -22,7 +22,9 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
     trpc.createClient({
       links: [
         loggerLink({
-          enabled: () => true,
+          enabled: (opts) => 
+            process.env.NODE_ENV === 'development' ||
+            (opts.direction === 'down' && opts.result instanceof Error),
         }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
